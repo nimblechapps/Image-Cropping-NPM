@@ -19,7 +19,6 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "prop-types": "^15.7.2",
     "react-easy-crop": "^5.0.7",
     "react": "^18.3.1"
   }
