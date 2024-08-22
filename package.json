@@ -6,6 +6,10 @@
   "scripts": {
     "build": "webpack"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nimblechapps/Image-Cropping-NPM"
+  },
   "author": "Nimblechapps",
   "license": "ISC",
   "devDependencies": {
@@ -18,6 +22,13 @@
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
+  "homepage": "https://github.com/nimblechapps/Image-Cropping-NPM",
+  "keywords": [
+    "react",
+    "image cropping",
+    "multiple images",
+    "image editor"
+  ],
   "dependencies": {
     "react-easy-crop": "^5.0.7",
     "react": "^18.3.1"
