@@ -59,7 +59,6 @@ const ImageCropDialog = ({
   const onCrop = async () => {
     const { fileUrl,
     createdFile} = await getCroppedImg(currentImage, croppedAreaPixels);
-    console.log('fileUrl,createdFile', fileUrl,createdFile)
     setCroppedImageFor(cropImageId, crop, zoom, aspect, fileUrl,createdFile);
   };
 
@@ -68,7 +67,6 @@ const ImageCropDialog = ({
   };
 
   const handleThumbnailClick =async (image,index) => {
-    console.log('index', index)
     setCurrentImage(image)
     setCroppedImageId(index)
     setCrop({ x: 0, y: 0 });
@@ -118,7 +116,6 @@ const ImageCropDialog = ({
         <div>
         {images?.map((image)=>(
           <>
-          {/* {console.log('image 107', image)} */}
           <img
           width={"100px"}
           style={{margin:"4px"}}

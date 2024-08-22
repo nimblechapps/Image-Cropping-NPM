@@ -41,7 +41,6 @@ export default async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
         const createdFile = new File([file], `canvas-image-${Date.now()}.jpeg`, {
           type: "image/jpeg",
         });
-      console.log(file);
            resolve({
         fileUrl: URL.createObjectURL(file),
         createdFile: createdFile

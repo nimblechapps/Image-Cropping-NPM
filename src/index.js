@@ -19,7 +19,6 @@ function CropingImageMultiple({onUpload}) {
 
 
   const setCroppedImageFor = (id, crop, zoom, aspect, croppedImageUrl, file) => {
-    console.log('id 34', id)
     const newImageList = images.map((image) =>(
       image.id === id 
       ? { ...image, crop, zoom, aspect, croppedImageUrl, file , cropped: true }
@@ -27,7 +26,6 @@ function CropingImageMultiple({onUpload}) {
       )
     );
   
-    console.log('newImageList',newImageList )
     setImages(newImageList);
     setCroppedImages((prevCropped) => [...prevCropped, croppedImageUrl]);
     const nextUncroppedImage = newImageList.find((image) => !image.croppedImageUrl)
@@ -65,8 +63,6 @@ function CropingImageMultiple({onUpload}) {
   const deleteImage = (imageToDelete) => {
     // Filter out the image that needs to be deleted from images array
     const updatedImages = images.filter((image) => image.croppedImageUrl !== imageToDelete);
-    console.log('updatedImages', updatedImages)
-    console.log('imageToDelete', imageToDelete)
     // Filter out the corresponding cropped image (if it exists) from croppedImages array
     const updatedCroppedImages = croppedImages.filter((croppedUrl) => croppedUrl !== imageToDelete);
   
