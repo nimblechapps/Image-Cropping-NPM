@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import getCroppedImg from "./cropImage";
+import CropperImage from "./Cropper";
 
 const aspectRatios = [
   { value: 4 / 3, text: "4/3" },
@@ -63,7 +64,10 @@ const ImageCropDialog = ({
   };
 
   const onResetImage = () => {
-    resetImage(id);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setAspect(aspectRatios[0]);
+    // resetImage(id);
   };
 
   const handleThumbnailClick =async (image,index) => {
@@ -78,7 +82,7 @@ const ImageCropDialog = ({
     <div>
       <div className="backdrop"></div>
       <div className="crop-container">
-        <Cropper
+        {/* <Cropper
           image={currentImage}
           zoom={zoom}
           crop={crop}
@@ -86,7 +90,16 @@ const ImageCropDialog = ({
           onCropChange={onCropChange}
           onZoomChange={onZoomChange}
           onCropComplete={onCropComplete}
-        />
+        /> */}
+           <CropperImage
+            image={currentImage}
+            zoom={zoom}
+            crop={crop}
+            aspect={aspect.value}
+            onCropChange={onCropChange}
+            onZoomChange={onZoomChange}
+            onCropComplete={onCropComplete}
+            />
       </div>
       <div className="controls">
         <div className="controls-upper-area">
