@@ -1,3 +1,4 @@
+// Helper function to create an image from a URL
 const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image();
@@ -7,10 +8,12 @@ const createImage = (url) =>
     image.src = url;
   });
 
+  // Convert degrees to radians
 function getRadianAngle(degreeValue) {
   return (degreeValue * Math.PI) / 180;
 }
 
+// Main function to crop the image
 export default async function getCroppedImg(imageSrc, pixelCrop, rotation = 0) {
   const image = await createImage(imageSrc);
 

@@ -13,7 +13,7 @@ import {
   classNames,
   clamp,
 } from './helpers'
-import cssStyles from './styles.css'
+import cssStyles from './index.css'
 
 
 
