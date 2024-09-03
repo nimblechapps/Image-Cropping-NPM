@@ -22,37 +22,40 @@ or
 yarn add multiple-image-crop-react
 
 
-Usage:
-
-
-### 4. **Usage**
-
-Explain how to use the package in a project. Include code snippets and examples.
-
-```markdown
 ## Usage
 
-To use the `MultipleImageCropping` component, import it into your React component and include it in your JSX.
+Once installed, you can use the `MultipleImageCropping` component in your React application. Import the component and include it in your JSX. You need to provide callback functions to handle the cropped images and any cancellation events.
+
+Here’s a basic example of how to use the component:
 
 ```jsx
 import React from 'react';
-import MultipleImageCropping from 'multiple-image-cropping';
+import MultipleImageCropping from 'multiple-image-crop-react';
 
 const App = () => {
+  // This function is called when the user completes cropping the images.
+  // It receives an array of cropped image objects as its parameter.
   const handleImageCrop = (croppedImages) => {
-    // Handle cropped images
+    // Process the array of cropped images here
     console.log(croppedImages);
+  };
+
+  // This function is called if the user cancels the cropping process.
+  // It can be used to handle or clear images as needed.
+  const handleCancle = (clearImage) => {
+    console.log('Image cropping cancelled:', clearImage);
   };
 
   return (
     <div>
       <h1>Image Cropping Example</h1>
-      <MultipleImageCropping onCrop={handleImageCrop} />
+      <MultipleImageCropping onUpload={handleImageCrop} onCancle={handleCancle} />
     </div>
   );
 };
 
 export default App;
+
 
 
 Example
@@ -65,7 +68,7 @@ Provide additional examples or a live demo link if available.
 ```markdown
 ## Examples
 
-You can view a live demo of this component at [Live Demo](https://example.com/demo).
+# You can view a live demo of this component at [Live Demo](https://example.com/demo).
 
 **Example Code:**
 
@@ -73,10 +76,14 @@ You can view a live demo of this component at [Live Demo](https://example.com/de
 import React from 'react';
 import MultipleImageCropping from 'multiple-image-cropping';
 
+const handleCancle = (value)=>{
+  console.log(value)
+}
+
 const Example = () => (
   <div style={{ padding: '20px' }}>
     <h1>Example Usage</h1>
-    <MultipleImageCropping onUpload={handleUpload} />
+    <MultipleImageCropping onUpload={handleUpload} onCancle={handleCancle}/>
   </div>
 );
 
