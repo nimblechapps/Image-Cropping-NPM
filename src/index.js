@@ -10,7 +10,6 @@ function CropingImageMultiple({onUpload,onCancel}) {
   const [images, setImages] = useState([]);
    // State to hold the list of cropped images
   const [croppedImages, setCroppedImages] = useState([]);
-  console.log('croppedImages', croppedImages)
   const [selectedImage,setSelectedImage]=useState(null)
   const [currentImage, setCurrentImage] = useState("");
   const [cropImageId, setCroppedImageId] = useState("")
