@@ -1,11 +1,17 @@
+import { Area, MediaSize, Point, Size } from './types'
+
+/**
+ * Compute the dimension of the crop area based on media size,
+ * aspect ratio and optionally rotation
+ */
 export function getCropSize(
-  mediaWidth,
-  mediaHeight,
-  containerWidth,
-  containerHeight,
-  aspect,
+  mediaWidth: number,
+  mediaHeight: number,
+  containerWidth: number,
+  containerHeight: number,
+  aspect: number,
   rotation = 0
-) {
+): Size {
   const { width, height } = rotateSize(mediaWidth, mediaHeight, rotation)
   const fittingWidth = Math.min(width, containerWidth)
   const fittingHeight = Math.min(height, containerHeight)
@@ -27,7 +33,7 @@ export function getCropSize(
  * Compute media zoom.
  * We fit the media into the container with "max-width: 100%; max-height: 100%;"
  */
-export function getMediaZoom(mediaSize) {
+export function getMediaZoom(mediaSize: MediaSize) {
   // Take the axis with more pixels to improve accuracy
   return mediaSize.width > mediaSize.height
     ? mediaSize.width / mediaSize.naturalWidth
@@ -38,12 +44,12 @@ export function getMediaZoom(mediaSize) {
  * Ensure a new media position stays in the crop area.
  */
 export function restrictPosition(
-  position,
-  mediaSize,
-  cropSize,
-  zoom,
+  position: Point,
+  mediaSize: Size,
+  cropSize: Size,
+  zoom: number,
   rotation = 0
-) {
+): Point {
   const { width, height } = rotateSize(mediaSize.width, mediaSize.height, rotation)
 
   return {
@@ -53,21 +59,21 @@ export function restrictPosition(
 }
 
 function restrictPositionCoord(
-  position,
-  mediaSize,
-  cropSize,
-  zoom
-) {
+  position: number,
+  mediaSize: number,
+  cropSize: number,
+  zoom: number
+): number {
   const maxPosition = (mediaSize * zoom) / 2 - cropSize / 2
 
   return clamp(position, -maxPosition, maxPosition)
 }
 
-export function getDistanceBetweenPoints(pointA, pointB) {
+export function getDistanceBetweenPoints(pointA: Point, pointB: Point) {
   return Math.sqrt(Math.pow(pointA.y - pointB.y, 2) + Math.pow(pointA.x - pointB.x, 2))
 }
 
-export function getRotationBetweenPoints(pointA, pointB) {
+export function getRotationBetweenPoints(pointA: Point, pointB: Point) {
   return (Math.atan2(pointB.y - pointA.y, pointB.x - pointA.x) * 180) / Math.PI
 }
 
@@ -76,14 +82,14 @@ export function getRotationBetweenPoints(pointA, pointB) {
  * x/y are the top-left coordinates on the src media
  */
 export function computeCroppedArea(
-  crop,
-  mediaSize,
-  cropSize,
-  aspect,
-  zoom,
+  crop: Point,
+  mediaSize: MediaSize,
+  cropSize: Size,
+  aspect: number,
+  zoom: number,
   rotation = 0,
   restrictPosition = true
-) {
+): { croppedAreaPercentages: Area; croppedAreaPixels: Area } {
   // if the media is rotated by the user, we cannot limit the position anymore
   // as it might need to be negative.
   const limitAreaFn = restrictPosition ? limitArea : noOp
@@ -160,11 +166,11 @@ export function computeCroppedArea(
 /**
  * Ensure the returned value is between 0 and max
  */
-function limitArea(max, value) {
+function limitArea(max: number, value: number): number {
   return Math.min(max, Math.max(0, value))
 }
 
-function noOp(_max, value) {
+function noOp(_max: number, value: number) {
   return value
 }
 
@@ -172,12 +178,12 @@ function noOp(_max, value) {
  * Compute crop and zoom from the croppedAreaPercentages.
  */
 export function getInitialCropFromCroppedAreaPercentages(
-  croppedAreaPercentages,
-  mediaSize,
-  rotation,
-  cropSize,
-  minZoom,
-  maxZoom
+  croppedAreaPercentages: Area,
+  mediaSize: MediaSize,
+  rotation: number,
+  cropSize: Size,
+  minZoom: number,
+  maxZoom: number
 ) {
   const mediaBBoxSize = rotateSize(mediaSize.width, mediaSize.height, rotation)
 
@@ -206,28 +212,28 @@ export function getInitialCropFromCroppedAreaPercentages(
  * Compute zoom from the croppedAreaPixels
  */
 function getZoomFromCroppedAreaPixels(
-  croppedAreaPixels,
-  mediaSize,
-  cropSizeÇ
-) {
+  croppedAreaPixels: Area,
+  mediaSize: MediaSize,
+  cropSize: Size
+): number {
   const mediaZoom = getMediaZoom(mediaSize)
 
-  return cropSizeÇ.height > cropSizeÇ.width
-    ? cropSizeÇ.height / (croppedAreaPixels.height * mediaZoom)
-    : cropSizeÇ.width / (croppedAreaPixels.width * mediaZoom)
+  return cropSize.height > cropSize.width
+    ? cropSize.height / (croppedAreaPixels.height * mediaZoom)
+    : cropSize.width / (croppedAreaPixels.width * mediaZoom)
 }
 
 /**
  * Compute crop and zoom from the croppedAreaPixels
  */
 export function getInitialCropFromCroppedAreaPixels(
-  croppedAreaPixels,
-  mediaSize,
+  croppedAreaPixels: Area,
+  mediaSize: MediaSize,
   rotation = 0,
-  cropSize,
-  minZoom,
-  maxZoom
-) {
+  cropSize: Size,
+  minZoom: number,
+  maxZoom: number
+): { crop: Point; zoom: number } {
   const mediaNaturalBBoxSize = rotateSize(mediaSize.naturalWidth, mediaSize.naturalHeight, rotation)
 
   const zoom = clamp(
@@ -254,21 +260,21 @@ export function getInitialCropFromCroppedAreaPixels(
 /**
  * Return the point that is the center of point a and b
  */
-export function getCenter(a, b) {
+export function getCenter(a: Point, b: Point): Point {
   return {
     x: (b.x + a.x) / 2,
     y: (b.y + a.y) / 2,
   }
 }
 
-export function getRadianAngle(degreeValue) {
+export function getRadianAngle(degreeValue: number) {
   return (degreeValue * Math.PI) / 180
 }
 
 /**
  * Returns the new bounding area of a rotated rectangle.
  */
-export function rotateSize(width, height, rotation) {
+export function rotateSize(width: number, height: number, rotation: number): Size {
   const rotRad = getRadianAngle(rotation)
 
   return {
@@ -280,14 +286,14 @@ export function rotateSize(width, height, rotation) {
 /**
  * Clamp value between min and max
  */
-export function clamp(value, min, max) {
+export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
 /**
  * Combine multiple class names into a single string.
  */
-export function classNames(...args) {
+export function classNames(...args: (boolean | string | number | undefined | void | null)[]) {
   return args
     .filter((value) => {
       if (typeof value === 'string' && value.length > 0) {

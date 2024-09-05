@@ -1,6 +1,6 @@
 import * as React from 'react'
 import normalizeWheel from 'normalize-wheel'
-// import { Area, MediaSize, Point, Size, VideoSrc } from './types'
+import { Area, MediaSize, Point, Size, VideoSrc } from './types'
 import {
   getCropSize,
   restrictPosition,
@@ -15,23 +15,80 @@ import {
 } from './helpers'
 import cssStyles from './index.css'
 
+export type CropperProps = {
+  image?: string
+  video?: string | VideoSrc[]
+  transform?: string
+  crop: Point
+  zoom: number
+  rotation: number
+  aspect: number
+  minZoom: number
+  maxZoom: number
+  cropShape: 'rect' | 'round'
+  cropSize?: Size
+  objectFit?: 'contain' | 'cover' | 'horizontal-cover' | 'vertical-cover'
+  showGrid?: boolean
+  zoomSpeed: number
+  zoomWithScroll?: boolean
+  onCropChange: (location: Point) => void
+  onZoomChange?: (zoom: number) => void
+  onRotationChange?: (rotation: number) => void
+  onCropComplete?: (croppedArea: Area, croppedAreaPixels: Area) => void
+  onCropAreaChange?: (croppedArea: Area, croppedAreaPixels: Area) => void
+  onCropSizeChange?: (cropSize: Size) => void
+  onInteractionStart?: () => void
+  onInteractionEnd?: () => void
+  onMediaLoaded?: (mediaSize: MediaSize) => void
+  style: {
+    containerStyle?: React.CSSProperties
+    mediaStyle?: React.CSSProperties
+    cropAreaStyle?: React.CSSProperties
+  }
+  classes: {
+    containerClassName?: string
+    mediaClassName?: string
+    cropAreaClassName?: string
+  }
+  restrictPosition: boolean
+  mediaProps: React.HTMLAttributes<HTMLElement> | React.HTMLAttributes<HTMLElement>
+  disableAutomaticStylesInjection?: boolean
+  initialCroppedAreaPixels?: Area
+  initialCroppedAreaPercentages?: Area
+  onTouchRequest?: (e: React.TouchEvent<HTMLDivElement>) => boolean
+  onWheelRequest?: (e: WheelEvent) => boolean
+  setImageRef?: (ref: React.RefObject<HTMLImageElement>) => void
+  setVideoRef?: (ref: React.RefObject<HTMLVideoElement>) => void
+  setMediaSize?: (size: MediaSize) => void
+  setCropSize?: (size: Size) => void
+  nonce?: string
+}
 
-
+type State = {
+  cropSize: Size | null
+  hasWheelJustStarted: boolean
+  mediaObjectFit: String | undefined
+}
 
 const MIN_ZOOM = 1
 const MAX_ZOOM = 3
 
+type GestureEvent = UIEvent & {
+  rotation: number
+  scale: number
+  clientX: number
+  clientY: number
+}
 
-
-class CropperImage extends React.Component {
+class Cropper extends React.Component<CropperProps, State> {
   static defaultProps = {
     zoom: 1,
     rotation: 0,
     aspect: 4 / 3,
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
-    cropShape:"rect",
-    objectFit:"contain",
+    cropShape: 'rect' as const,
+    objectFit: 'contain' as const,
     showGrid: true,
     style: {},
     classes: {},
@@ -41,28 +98,28 @@ class CropperImage extends React.Component {
     zoomWithScroll: true,
   }
 
-  imageRef = React.createRef()
-  videoRef = React.createRef()
-  containerPosition= { x: 0, y: 0 }
-  containerRef = null
-  styleRef  = null
-  containerRect = null
-  mediaSize = { width: 0, height: 0, naturalWidth: 0, naturalHeight: 0 }
-  dragStartPosition = { x: 0, y: 0 }
-  dragStartCrop = { x: 0, y: 0 }
+  imageRef: React.RefObject<HTMLImageElement> = React.createRef()
+  videoRef: React.RefObject<HTMLVideoElement> = React.createRef()
+  containerPosition: Point = { x: 0, y: 0 }
+  containerRef: HTMLDivElement | null = null
+  styleRef: HTMLStyleElement | null = null
+  containerRect: DOMRect | null = null
+  mediaSize: MediaSize = { width: 0, height: 0, naturalWidth: 0, naturalHeight: 0 }
+  dragStartPosition: Point = { x: 0, y: 0 }
+  dragStartCrop: Point = { x: 0, y: 0 }
   gestureZoomStart = 0
   gestureRotationStart = 0
   isTouching = false
   lastPinchDistance = 0
   lastPinchRotation = 0
-  rafDragTimeout = null
-  rafPinchTimeout = null
-  wheelTimer = null
-  currentDoc = typeof document !== 'undefined' ? document : null
-  currentWindow= typeof window !== 'undefined' ? window : null
-  resizeObserver = null
+  rafDragTimeout: number | null = null
+  rafPinchTimeout: number | null = null
+  wheelTimer: number | null = null
+  currentDoc: Document | null = typeof document !== 'undefined' ? document : null
+  currentWindow: Window | null = typeof window !== 'undefined' ? window : null
+  resizeObserver: ResizeObserver | null = null
 
-  state = {
+  state: State = {
     cropSize: null,
     hasWheelJustStarted: false,
     mediaObjectFit: undefined,
@@ -85,7 +142,7 @@ class CropperImage extends React.Component {
       }
       this.props.zoomWithScroll &&
         this.containerRef.addEventListener('wheel', this.onWheel, { passive: false })
-      this.containerRef.addEventListener('gesturestart', this.onGestureStart )
+      this.containerRef.addEventListener('gesturestart', this.onGestureStart as EventListener)
     }
 
     this.currentDoc.addEventListener('scroll', this.onScroll)
@@ -133,7 +190,7 @@ class CropperImage extends React.Component {
     this.props.zoomWithScroll && this.clearScrollEvent()
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps: CropperProps) {
     if (prevProps.rotation !== this.props.rotation) {
       this.computeSizes()
       this.recomputeCropPosition()
@@ -185,7 +242,7 @@ class CropperImage extends React.Component {
   }
 
   // this is to prevent Safari on iOS >= 10 to zoom the page
-  preventZoomSafari = (e) => e.preventDefault()
+  preventZoomSafari = (e: Event) => e.preventDefault()
 
   cleanEvents = () => {
     if (!this.currentDoc) return
@@ -193,8 +250,8 @@ class CropperImage extends React.Component {
     this.currentDoc.removeEventListener('mouseup', this.onDragStopped)
     this.currentDoc.removeEventListener('touchmove', this.onTouchMove)
     this.currentDoc.removeEventListener('touchend', this.onDragStopped)
-    this.currentDoc.removeEventListener('gesturemove', this.onGestureMove)
-    this.currentDoc.removeEventListener('gestureend', this.onGestureEnd)
+    this.currentDoc.removeEventListener('gesturemove', this.onGestureMove as EventListener)
+    this.currentDoc.removeEventListener('gestureend', this.onGestureEnd as EventListener)
     this.currentDoc.removeEventListener('scroll', this.onScroll)
   }
 
@@ -218,7 +275,7 @@ class CropperImage extends React.Component {
     }
   }
 
-  setInitialCrop = (cropSize) => {
+  setInitialCrop = (cropSize: Size) => {
     if (this.props.initialCroppedAreaPercentages) {
       const { crop, zoom } = getInitialCropFromCroppedAreaPercentages(
         this.props.initialCroppedAreaPercentages,
@@ -296,7 +353,7 @@ class CropperImage extends React.Component {
       // to the container. That allows us to use the container's dimensions
       // and natural aspect ratio of the media to calculate accurate media size.
       // However, for this to work, the container should not be rotated
-      let renderedMediaSize
+      let renderedMediaSize: Size
 
       if (isMediaScaledDown) {
         switch (this.state.mediaObjectFit) {
@@ -378,34 +435,34 @@ class CropperImage extends React.Component {
     }
   }
 
-  static getMousePoint = (e) => ({
+  static getMousePoint = (e: MouseEvent | React.MouseEvent | GestureEvent) => ({
     x: Number(e.clientX),
     y: Number(e.clientY),
   })
 
-  static getTouchPoint = (touch) => ({
+  static getTouchPoint = (touch: Touch ) => ({
     x: Number(touch.clientX),
     y: Number(touch.clientY),
   })
 
-  onMouseDown = (e) => {
+  onMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!this.currentDoc) return
     e.preventDefault()
     this.currentDoc.addEventListener('mousemove', this.onMouseMove)
     this.currentDoc.addEventListener('mouseup', this.onDragStopped)
     this.saveContainerPosition()
-    this.onDragStart(CropperImage.getMousePoint(e))
+    this.onDragStart(Cropper.getMousePoint(e))
   }
 
-  onMouseMove = (e) => this.onDrag(CropperImage.getMousePoint(e))
+  onMouseMove = (e: MouseEvent) => this.onDrag(Cropper.getMousePoint(e))
 
-  onScroll = (e) => {
+  onScroll = (e: Event) => {
     if (!this.currentDoc) return
     e.preventDefault()
     this.saveContainerPosition()
   }
 
-  onTouchStart = (e) => {
+  onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!this.currentDoc) return
     this.isTouching = true
     if (this.props.onTouchRequest && !this.props.onTouchRequest(e)) {
@@ -420,37 +477,37 @@ class CropperImage extends React.Component {
     if (e.touches.length === 2) {
       this.onPinchStart(e)
     } else if (e.touches.length === 1) {
-      this.onDragStart(CropperImage.getTouchPoint(e.touches[0]))
+      this.onDragStart(Cropper.getTouchPoint(e.touches[0]))
     }
   }
 
-  onTouchMove = (e) => {
+  onTouchMove = (e: TouchEvent) => {
     // Prevent whole page from scrolling on iOS.
     e.preventDefault()
     if (e.touches.length === 2) {
       this.onPinchMove(e)
     } else if (e.touches.length === 1) {
-      this.onDrag(CropperImage.getTouchPoint(e.touches[0]))
+      this.onDrag(Cropper.getTouchPoint(e.touches[0]))
     }
   }
 
-  onGestureStart = (e) => {
+  onGestureStart = (e: GestureEvent) => {
     if (!this.currentDoc) return
     e.preventDefault()
-    this.currentDoc.addEventListener('gesturechange', this.onGestureMove)
-    this.currentDoc.addEventListener('gestureend', this.onGestureEnd)
+    this.currentDoc.addEventListener('gesturechange', this.onGestureMove as EventListener)
+    this.currentDoc.addEventListener('gestureend', this.onGestureEnd as EventListener)
     this.gestureZoomStart = this.props.zoom
     this.gestureRotationStart = this.props.rotation
   }
 
-  onGestureMove = (e) => {
+  onGestureMove = (e: GestureEvent) => {
     e.preventDefault()
     if (this.isTouching) {
       // this is to avoid conflict between gesture and touch events
       return
     }
 
-    const point = CropperImage.getMousePoint(e)
+    const point = Cropper.getMousePoint(e)
     const newZoom = this.gestureZoomStart - 1 + e.scale
     this.setNewZoom(newZoom, point, { shouldUpdatePosition: true })
     if (this.props.onRotationChange) {
@@ -459,17 +516,17 @@ class CropperImage extends React.Component {
     }
   }
 
-  onGestureEnd = (e) => {
+  onGestureEnd = (e: GestureEvent) => {
     this.cleanEvents()
   }
 
-  onDragStart = ({ x, y }) => {
+  onDragStart = ({ x, y }: Point) => {
     this.dragStartPosition = { x, y }
     this.dragStartCrop = { ...this.props.crop }
     this.props.onInteractionStart?.()
   }
 
-  onDrag = ({ x, y }) => {
+  onDrag = ({ x, y }: Point) => {
     if (!this.currentWindow) return
     if (this.rafDragTimeout) this.currentWindow.cancelAnimationFrame(this.rafDragTimeout)
 
@@ -503,18 +560,18 @@ class CropperImage extends React.Component {
     this.props.onInteractionEnd?.()
   }
 
-  onPinchStart(e) {
-    const pointA = CropperImage.getTouchPoint(e.touches[0])
-    const pointB = CropperImage.getTouchPoint(e.touches[1])
+  onPinchStart(e: React.TouchEvent<HTMLDivElement>) {
+    const pointA = Cropper.getTouchPoint(e.touches[0])
+    const pointB = Cropper.getTouchPoint(e.touches[1])
     this.lastPinchDistance = getDistanceBetweenPoints(pointA, pointB)
     this.lastPinchRotation = getRotationBetweenPoints(pointA, pointB)
     this.onDragStart(getCenter(pointA, pointB))
   }
 
-  onPinchMove(e) {
+  onPinchMove(e: TouchEvent) {
     if (!this.currentDoc || !this.currentWindow) return
-    const pointA = CropperImage.getTouchPoint(e.touches[0])
-    const pointB = CropperImage.getTouchPoint(e.touches[1])
+    const pointA = Cropper.getTouchPoint(e.touches[0])
+    const pointB = Cropper.getTouchPoint(e.touches[1])
     const center = getCenter(pointA, pointB)
     this.onDrag(center)
 
@@ -532,14 +589,14 @@ class CropperImage extends React.Component {
     })
   }
 
-  onWheel = (e) => {
+  onWheel = (e: WheelEvent) => {
     if (!this.currentWindow) return
     if (this.props.onWheelRequest && !this.props.onWheelRequest(e)) {
       return
     }
 
     e.preventDefault()
-    const point = CropperImage.getMousePoint(e)
+    const point = Cropper.getMousePoint(e)
     const { pixelY } = normalizeWheel(e)
     const newZoom = this.props.zoom - (pixelY * this.props.zoomSpeed) / 200
     this.setNewZoom(newZoom, point, { shouldUpdatePosition: true })
@@ -557,9 +614,9 @@ class CropperImage extends React.Component {
     )
   }
 
-  getPointOnContainer = ({ x, y }, containerTopLeft) => {
+  getPointOnContainer = ({ x, y }: Point, containerTopLeft: Point): Point => {
     if (!this.containerRect) {
-      throw new Error('The CropperImage is not mounted')
+      throw new Error('The Cropper is not mounted')
     }
     return {
       x: this.containerRect.width / 2 - (x - containerTopLeft.x),
@@ -567,7 +624,7 @@ class CropperImage extends React.Component {
     }
   }
 
-  getPointOnMedia = ({ x, y }) => {
+  getPointOnMedia = ({ x, y }: Point) => {
     const { crop, zoom } = this.props
     return {
       x: (x + crop.x) / zoom,
@@ -575,7 +632,7 @@ class CropperImage extends React.Component {
     }
   }
 
-  setNewZoom = (zoom, point, { shouldUpdatePosition = true } = {}) => {
+  setNewZoom = (zoom: number, point: Point, { shouldUpdatePosition = true } = {}) => {
     if (!this.state.cropSize || !this.props.onZoomChange) return
 
     const newZoom = clamp(zoom, this.props.minZoom, this.props.maxZoom)
@@ -706,7 +763,7 @@ class CropperImage extends React.Component {
               objectFit === 'vertical-cover' && 'reactEasyCrop_Cover_Vertical',
               mediaClassName
             )}
-            {...(mediaProps )}
+            {...(mediaProps as React.HTMLAttributes<HTMLElement>)}
             src={image}
             ref={this.imageRef}
             style={{
@@ -767,4 +824,4 @@ class CropperImage extends React.Component {
   }
 }
 
-export default CropperImage
+export default Cropper
