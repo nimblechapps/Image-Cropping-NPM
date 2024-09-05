@@ -13,7 +13,7 @@ import {
   classNames,
   clamp,
 } from './helpers'
-import cssStyles from './index.css'
+import cssStyles from './styles.css'
 
 export type CropperProps = {
   image?: string
@@ -51,7 +51,7 @@ export type CropperProps = {
     cropAreaClassName?: string
   }
   restrictPosition: boolean
-  mediaProps: React.HTMLAttributes<HTMLElement> | React.HTMLAttributes<HTMLElement>
+  mediaProps: React.ImgHTMLAttributes<HTMLElement> | React.VideoHTMLAttributes<HTMLElement>
   disableAutomaticStylesInjection?: boolean
   initialCroppedAreaPixels?: Area
   initialCroppedAreaPercentages?: Area
@@ -440,7 +440,7 @@ class Cropper extends React.Component<CropperProps, State> {
     y: Number(e.clientY),
   })
 
-  static getTouchPoint = (touch: Touch ) => ({
+  static getTouchPoint = (touch: Touch | React.Touch) => ({
     x: Number(touch.clientX),
     y: Number(touch.clientY),
   })
@@ -763,7 +763,7 @@ class Cropper extends React.Component<CropperProps, State> {
               objectFit === 'vertical-cover' && 'reactEasyCrop_Cover_Vertical',
               mediaClassName
             )}
-            {...(mediaProps as React.HTMLAttributes<HTMLElement>)}
+            {...(mediaProps as React.ImgHTMLAttributes<HTMLElement>)}
             src={image}
             ref={this.imageRef}
             style={{
