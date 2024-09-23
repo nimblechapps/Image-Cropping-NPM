@@ -1,3 +1,5 @@
+import {Area} from "./types"
+
 // Helper function to create an image from a URL
 const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
@@ -13,18 +15,13 @@ function getRadianAngle(degreeValue: number): number {
   return (degreeValue * Math.PI) / 180;
 }
 
-// Interface to define the pixel crop object
-interface PixelCrop {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+
+
 
 // Main function to crop the image
 export default async function getCroppedImg(
   imageSrc: string,
-  pixelCrop: PixelCrop,
+  pixelCrop: Area,
   rotation: number = 0
 ): Promise<{ fileUrl: string; createdFile: File }> {
   const image = await createImage(imageSrc);

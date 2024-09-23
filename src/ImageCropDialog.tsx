@@ -3,18 +3,11 @@ import getCroppedImg from "./cropImage";
 import Slider from "react-slick";
 import Cropper from "./Cropper"
 import "slick-carousel/slick/slick-theme.css";
-import "slick-carousel/slick/slick.css";import { type } from "os";
-import { number, string } from "prop-types";
+import "slick-carousel/slick/slick.css";
+import { AspectRatio,Image,ImageCropDialogProps,Area} from "./types";
 
 
-
-// Define the correct AspectRatio type
-type AspectRatio = {
-  value: number, // use lowercase 'number' for TypeScript
-  text: string  // use lowercase 'string' for TypeScript
-};
-
-// Aspect ratios for cropping options
+// Aspect Ratio Options for Cropping
 const aspectRatios: AspectRatio[] = [
   { value: 4 / 3, text: "4/3" },
   { value: 16 / 9, text: "16/9" },
@@ -22,47 +15,14 @@ const aspectRatios: AspectRatio[] = [
 ];
 
 
-interface Image {
-  id: number;
-  imageUrl: string;
-  file: File | null;
-}
-
-interface ImageCropDialogProps {
-  id?: number;
-  imageUrl?: string;
-  cropInit?: { x: number; y: number };
-  zoomInit?: number;
-  aspectInit?: { value: number; text: string };
-  onDoneAll: () => void;
-  setCroppedImageFor: (
-    id: number,
-    crop: { x: number; y: number },
-    zoom: number,
-    aspect: { value: number; text: string },
-    fileUrl: string,
-    createdFile: File
-  ) => void;
-  images: Image[];
-  setSelectedImage: any;
-  currentImage: any;
-  setCurrentImage: (url: string) => void;
-  cropImageId: any;
-  setCroppedImageId: (id: number) => void;
-  imageName: string | null;
-  setImageName: (name: string) => void;
-}
 
 const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
-  id,
-  imageUrl,
   cropInit = { x: 0, y: 0 },
   zoomInit = 1,
   aspectInit = aspectRatios[0],
   onDoneAll,
   setCroppedImageFor,
   images,
-  setSelectedImage,
   currentImage,
   setCurrentImage,
   cropImageId,
@@ -79,27 +39,21 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
 
   const onZoomChange = (zoom: number) => setZoom(zoom);
 
-  const onAspectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = parseFloat(e.target.value);
-    const ratio = aspectRatios.find((ratio) => ratio.value === value);
-    if (ratio) {
-      setAspect(ratio);
-    }
-  };
 
-  const onCropComplete = (_: any, croppedAreaPixels: any) => {
+  const onCropComplete = (croppedArea: Area, croppedAreaPixels: any) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 
   const onCrop = async () => {
     const { fileUrl, createdFile } = await getCroppedImg(currentImage, croppedAreaPixels);
-    setCroppedImageFor(cropImageId, crop, zoom, aspect, fileUrl, createdFile);
+    setCroppedImageFor(+cropImageId, crop, zoom, aspect, fileUrl, createdFile);
   };
 
   const onResetImage = () => {
     setCrop({ x: 0, y: 0 });
     setZoom(1);
-    setAspect(aspectRatios[0]);
+    const initialAspect = aspectRatios[0];
+    setAspect(initialAspect);
   };
 
   const handleThumbnailClick = (image: Image, index: number) => {
@@ -109,7 +63,7 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
     onResetImage();
   };
 
-  const SampleNextArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
+  const SampleNextArrow: React.FC<{ onClick?: () => void }> = React.memo(({ onClick }) => (
     <div className="nextArrow" onClick={onClick}>
       <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -121,9 +75,9 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
         />
       </svg>
     </div>
-  );
+  ));
 
-  const SamplePrevArrow: React.FC<{ onClick?: () => void }> = ({ onClick }) => (
+  const SamplePrevArrow: React.FC<{ onClick?: () => void }> = React.memo(({ onClick }) => (
     <div className="prevArrow" onClick={onClick}>
       <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -135,7 +89,7 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
         />
       </svg>
     </div>
-  );
+  ));
 
   const settings = {
     dots: false,
@@ -150,7 +104,7 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
 
   return (
     <>
-      <div className="ss">
+      <div>
         <div className="crop-container">
           <Cropper
             image={currentImage || ""}
@@ -160,15 +114,15 @@ const ImageCropDialog: React.FC<ImageCropDialogProps> = ({
             onCropChange={onCropChange}
             onZoomChange={onZoomChange}
             onCropComplete={onCropComplete}
-            rotation={0}             // Provide the rotation value
-            minZoom={1}                     // Set the minimum zoom level
-            maxZoom={3}                     // Set the maximum zoom level
-            cropShape="rect"                // Set the crop shape, e.g., "rect" or "round"
-            objectFit="contain"             // Set object fit, e.g., "contain" or "cover"
-            zoomSpeed={1}                   // Default zoom speed (can adjust as necessary)
+            rotation={0}             
+            minZoom={1}              
+            maxZoom={3}              
+            cropShape="rect"         
+            objectFit="contain"      
+            zoomSpeed={1}            
             classes={{}} 
-            style={{}}                   // If you have CSS classes to pass
-            restrictPosition={true}         // Restrict image movement within the crop area
+            style={{}}               
+            restrictPosition={true}  
             mediaProps={{}}  
           />
         </div>

@@ -3,28 +3,10 @@ import "./index.css";
 import ImageCropDialog from "./ImageCropDialog";
 import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-// Define the props for the component
+import {Image,CroppedImage,AspectRatio} from "./types"
 interface CropingImageMultipleProps {
   onUpload: (images: CroppedImage[]) => void;
-  onCancel: (action: string) => void;
-}
-
-// Define types for the image and cropped image states
-interface Image {
-  id: number;
-  imageUrl: string;
-  croppedImageUrl: string | null;
-  file: File;
-  cropped: boolean;
-  crop?: any; // Specify more concrete types if necessary
-  zoom?: any; // Specify more concrete types if necessary
-  aspect?: any; // Specify more concrete types if necessary
-}
-
-interface CroppedImage {
-  croppedImageUrl: string;
-  imageCropName: string | undefined;
+  onCancel: (action: string | any[]) => void;
 }
 
 const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, onCancel }) => {
@@ -32,7 +14,7 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
   const [croppedImages, setCroppedImages] = useState<CroppedImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<Image | null>(null);
   const [currentImage, setCurrentImage] = useState<string>("");
-  const [cropImageId, setCroppedImageId] = useState<number | null>(null);
+  const [cropImageId, setCroppedImageId] = useState<number | string>("");
   const [imageName, setImageName] = useState<string>("");
   const [show, setShow] = useState<boolean>(false);
 
@@ -57,9 +39,9 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
 
   const setCroppedImageFor = (
     id: number,
-    crop: any,
-    zoom: any,
-    aspect: any,
+    crop: { x: number; y: number },
+    zoom: number,
+    aspect: { value: number; text: string },
     croppedImageUrl: string,
     file: File
   ) => {
@@ -99,7 +81,7 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
     setImages((prevImages) => [...prevImages, ...newImages]);
     setCurrentImage(newImages[0]?.imageUrl || "");
     setSelectedImage(newImages[0]);
-    setCroppedImageId(newImages[0]?.id || null);
+    setCroppedImageId(newImages[0]?.id || "");
     setImageName(newImages[0]?.file?.name || "");
     handleShow();
   };
@@ -124,12 +106,14 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
     setImages([]);
     setCroppedImages([]);
     setSelectedImage(null);
-    setCroppedImageId(null);
+    setCroppedImageId("");
     if (onCancel) {
-      onCancel("clearImage");
+      onCancel([]);
     }
   };
 
+  
+  const aspectInit: AspectRatio | undefined = selectedImage?.aspect;
   return (
     <div className='fileuploadComponent'>
       <div className='fileuploadWrapper'>
@@ -155,7 +139,9 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
               </div>
             </div>
             <button className='deleteBtn' onClick={() => deleteImage(image.croppedImageUrl)}>
-              {/* SVG icon here */}
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.3333 5.00002V4.33335C13.3333 3.39993 13.3333 2.93322 13.1517 2.5767C12.9919 2.2631 12.7369 2.00813 12.4233 1.84834C12.0668 1.66669 11.6001 1.66669 10.6667 1.66669H9.33333C8.39991 1.66669 7.9332 1.66669 7.57668 1.84834C7.26308 2.00813 7.00811 2.2631 6.84832 2.5767C6.66667 2.93322 6.66667 3.39993 6.66667 4.33335V5.00002M8.33333 9.58335V13.75M11.6667 9.58335V13.75M2.5 5.00002H17.5M15.8333 5.00002V14.3334C15.8333 15.7335 15.8333 16.4336 15.5608 16.9683C15.3212 17.4387 14.9387 17.8212 14.4683 18.0609C13.9335 18.3334 13.2335 18.3334 11.8333 18.3334H8.16667C6.76654 18.3334 6.06647 18.3334 5.53169 18.0609C5.06129 17.8212 4.67883 17.4387 4.43915 16.9683C4.16667 16.4336 4.16667 15.7335 4.16667 14.3334V5.00002" stroke="#344054" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </button>
           </div>
         ))}
@@ -174,15 +160,12 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
           </Modal.Header>
           {selectedImage ? (
             <ImageCropDialog
-              id={selectedImage?.id}
-              imageUrl={selectedImage?.imageUrl}
               cropInit={selectedImage?.crop}
               zoomInit={selectedImage?.zoom}
-              aspectInit={selectedImage?.aspect}
+              aspectInit={aspectInit}
               onDoneAll={onDoneAll}
               setCroppedImageFor={setCroppedImageFor}
               images={images}
-              setSelectedImage={setSelectedImage}
               setCurrentImage={setCurrentImage}
               currentImage={currentImage}
               cropImageId={cropImageId}

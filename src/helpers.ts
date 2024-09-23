@@ -41,7 +41,23 @@ export function getMediaZoom(mediaSize: MediaSize) {
 }
 
 /**
- * Ensure a new media position stays in the crop area.
+ * Ensure a new media position stays within the crop area boundaries.
+ * 
+ * This function adjusts the position of the media to ensure that it remains 
+ * within the defined crop area, even when the media is rotated or zoomed.
+ * 
+ * Parameters:
+ * - `position`: The current position of the media.
+ * - `mediaSize`: The size of the media (width and height).
+ * - `cropSize`: The size of the crop area (width and height).
+ * - `zoom`: The zoom level applied to the media.
+ * - `rotation` (optional): The rotation angle of the media, default is 0.
+ * 
+ * Returns:
+ * - A new position object with x and y coordinates restricted within the crop area.
+ * 
+ * The function uses `rotateSize` to handle the dimensions of the media after rotation 
+ * and `restrictPositionCoord` to constrain the position based on the crop area and zoom.
  */
 export function restrictPosition(
   position: Point,
@@ -130,10 +146,11 @@ export function computeCroppedArea(
   )
   const isImgWiderThanHigh = mediaNaturalBBoxSize.width >= mediaNaturalBBoxSize.height * aspect
 
-  // then we ensure the width and height exactly match the aspect (to avoid rounding approximations)
-  // if the media is wider than high, when zoom is 0, the crop height will be equals to image height
-  // thus we want to compute the width from the height and aspect for accuracy.
-  // Otherwise, we compute the height from width and aspect.
+/**
+ * Adjusts crop area dimensions to fit a specified aspect ratio, compensating for rounding errors.
+ * Calculates dimensions based on media size, zoom, and aspect ratio to ensure accuracy.
+ */
+
   const sizePixels = isImgWiderThanHigh
     ? {
         width: Math.round(heightInPixels * aspect),
@@ -299,7 +316,6 @@ export function classNames(...args: (boolean | string | number | undefined | voi
       if (typeof value === 'string' && value.length > 0) {
         return true
       }
-
       return false
     })
     .join(' ')
