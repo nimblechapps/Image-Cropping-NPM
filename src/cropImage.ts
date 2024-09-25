@@ -15,9 +15,6 @@ function getRadianAngle(degreeValue: number): number {
   return (degreeValue * Math.PI) / 180;
 }
 
-
-
-
 // Main function to crop the image
 export default async function getCroppedImg(
   imageSrc: string,
