@@ -3,9 +3,7 @@ export type Size = {
   height: number;
 };
 
-export type MediaSize = {
-  width: number;
-  height: number;
+export type MediaSize = Size & {
   naturalWidth: number;
   naturalHeight: number;
 };
@@ -66,5 +64,4 @@ export interface ImageCropDialogProps {
 export interface CroppedImage {
   croppedImageUrl: string;
   imageCropName?: string; 
-  // Use optional chaining for consistency
 }

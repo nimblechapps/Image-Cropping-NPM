@@ -5,7 +5,7 @@ import { Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {Image,CroppedImage,AspectRatio} from "./types"
 interface CropingImageMultipleProps {
-  onUpload: (images: CroppedImage[]) => void;
+  onUpload: (images: string | any[]) => void;
   onCancel: (action: string | any[]) => void;
 }
 
@@ -97,7 +97,7 @@ const CropingImageMultiple: React.FC<CropingImageMultipleProps> = ({ onUpload, o
 
   const handleUpload = () => {
     if (onUpload) {
-      const uploadedImageDetails :any = images.filter((image) => image.croppedImageUrl);
+      const uploadedImageDetails :Image[] = images.filter((image) => image.croppedImageUrl);
       onUpload(uploadedImageDetails);
     }
   };

@@ -100,7 +100,7 @@ button {
 
 .reactEasyCrop_Image,
 .reactEasyCrop_Video {
-  will-change: transform; /* this improves performances and prevent painting issues on iOS Chrome */
+  will-change: transform;
 }
 
 .reactEasyCrop_Contain {

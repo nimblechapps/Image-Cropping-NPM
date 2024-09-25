@@ -34,7 +34,6 @@ export function getCropSize(
  * We fit the media into the container with "max-width: 100%; max-height: 100%;"
  */
 export function getMediaZoom(mediaSize: MediaSize) {
-  // Take the axis with more pixels to improve accuracy
   return mediaSize.width > mediaSize.height
     ? mediaSize.width / mediaSize.naturalWidth
     : mediaSize.height / mediaSize.naturalHeight
@@ -106,15 +105,18 @@ export function computeCroppedArea(
   rotation = 0,
   restrictPosition = true
 ): { croppedAreaPercentages: Area; croppedAreaPixels: Area } {
-  // if the media is rotated by the user, we cannot limit the position anymore
-  // as it might need to be negative.
+/*
+  If the media is rotated by the user, we cannot limit the position anymore
+  as it might need to be negative.
+*/
   const limitAreaFn = restrictPosition ? limitArea : noOp
 
   const mediaBBoxSize = rotateSize(mediaSize.width, mediaSize.height, rotation)
   const mediaNaturalBBoxSize = rotateSize(mediaSize.naturalWidth, mediaSize.naturalHeight, rotation)
 
-  // calculate the crop area in percentages
-  // in the rotated space
+  /* calculate the crop area in percentages
+  in the rotated space
+  */
   const croppedAreaPercentages = {
     x: limitAreaFn(
       100,
@@ -180,9 +182,9 @@ export function computeCroppedArea(
   return { croppedAreaPercentages, croppedAreaPixels }
 }
 
-/**
- * Ensure the returned value is between 0 and max
- */
+
+ // Ensure the returned value is between 0 and max
+ 
 function limitArea(max: number, value: number): number {
   return Math.min(max, Math.max(0, value))
 }
@@ -191,9 +193,8 @@ function noOp(_max: number, value: number) {
   return value
 }
 
-/**
- * Compute crop and zoom from the croppedAreaPercentages.
- */
+
+ //Compute crop and zoom from the croppedAreaPercentages.
 export function getInitialCropFromCroppedAreaPercentages(
   croppedAreaPercentages: Area,
   mediaSize: MediaSize,
@@ -240,9 +241,9 @@ function getZoomFromCroppedAreaPixels(
     : cropSize.width / (croppedAreaPixels.width * mediaZoom)
 }
 
-/**
- * Compute crop and zoom from the croppedAreaPixels
- */
+
+ // Compute crop and zoom from the croppedAreaPixels
+ 
 export function getInitialCropFromCroppedAreaPixels(
   croppedAreaPixels: Area,
   mediaSize: MediaSize,
@@ -274,9 +275,9 @@ export function getInitialCropFromCroppedAreaPixels(
   return { crop, zoom }
 }
 
-/**
- * Return the point that is the center of point a and b
- */
+
+ // Return the point that is the center of point a and b
+ 
 export function getCenter(a: Point, b: Point): Point {
   return {
     x: (b.x + a.x) / 2,
@@ -288,9 +289,9 @@ export function getRadianAngle(degreeValue: number) {
   return (degreeValue * Math.PI) / 180
 }
 
-/**
- * Returns the new bounding area of a rotated rectangle.
- */
+
+ // Returns the new bounding area of a rotated rectangle.
+
 export function rotateSize(width: number, height: number, rotation: number): Size {
   const rotRad = getRadianAngle(rotation)
 
@@ -300,16 +301,16 @@ export function rotateSize(width: number, height: number, rotation: number): Siz
   }
 }
 
-/**
- * Clamp value between min and max
- */
+
+ // Clamp value between min and max
+ 
 export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-/**
- * Combine multiple class names into a single string.
- */
+
+ // Combine multiple class names into a single string.
+ 
 export function classNames(...args: (boolean | string | number | undefined | void | null)[]) {
   return args
     .filter((value) => {
