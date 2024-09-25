@@ -51,7 +51,7 @@ const App = () => {
   return (
     <div>
       <h1>Image Cropping Example</h1>
-      <MultipleImageCropping onUpload={handleImageCrop} onCancle={handleCancle} />
+      <MultipleImageCropping onUpload={handleImageCrop} onCancel={handleCancle} />
     </div>
   );
 };
