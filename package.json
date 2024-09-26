@@ -1,8 +1,9 @@
 {
   "name": "multiple-image-crop-react",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "multiple image cropping",
   "main": "./build/index.js",
+  "types": "./@types/multiple-image-crop-react/index.d.ts",
   "scripts": {
     "build": "webpack"
   },
