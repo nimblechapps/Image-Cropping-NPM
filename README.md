@@ -14,7 +14,6 @@
 
 - Responsive (you can use pixels or percentages).
 - Free-form or fixed aspect crops.
-- No dependencies/small footprint .
 - Min/max crop size.
 - Crop multiple images.
 
